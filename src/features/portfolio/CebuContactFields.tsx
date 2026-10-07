@@ -1,6 +1,10 @@
-import { useId, useState } from 'react';
+import { useId } from 'react';
+import { SearchSelect } from '../../components/SearchSelect';
 import {
-  CEBU_BARANGAYS,
+  CEBU_LOCATIONS,
+  cityCode,
+  cityLocation,
+  addressSummary,
   emptyCebuAddress,
   normalizePhilippinePhone,
   validPhilippinePhone,
@@ -18,7 +22,6 @@ export function CebuContactFields({
   onChange: (draft: PortfolioDraft) => void;
 }) {
   const id = useId();
-  const [search, setSearch] = useState('');
   const address = draft.cebu_address;
   const normalized = normalizePhilippinePhone(draft.contact_number);
   const legacyPhone =
@@ -84,45 +87,40 @@ export function CebuContactFields({
               <input id={id + 'country'} value="Philippines" readOnly />
             </div>
             <div>
-              <label htmlFor={id + 'city'}>City</label>
-              <input id={id + 'city'} value="Cebu City" readOnly />
+              <label htmlFor={id + 'area'}>Coverage</label>
+              <input id={id + 'area'} value="Cebu" readOnly />
             </div>
           </div>
-          <label htmlFor={id + 'search'}>Search barangays</label>
-          <input
-            id={id + 'search'}
-            type="search"
-            value={search}
-            placeholder="Type a barangay name"
-            onChange={(event) => setSearch(event.target.value)}
+          <SearchSelect
+            label="City / municipality (optional)"
+            name="city_code"
+            value={cityCode(address)}
+            options={CEBU_LOCATIONS.map((city) => ({ value: city.code, label: city.name }))}
+            placeholder="Choose a city or municipality"
+            error={errors.city_code}
+            onChange={(value) =>
+              onChange({
+                ...draft,
+                cebu_address: { ...address, city_code: value, barangay: '', postal_code: '' },
+              })
+            }
           />
-          <label htmlFor={id + 'barangay'}>Barangay (optional)</label>
-          <select
-            id={id + 'barangay'}
+          <SearchSelect
+            key={cityCode(address)}
+            label="Barangay (optional)"
             name="barangay"
             value={address.barangay}
-            aria-invalid={!!errors.barangay}
-            aria-describedby={errors.barangay ? id + 'barangay-error' : undefined}
-            onChange={(event) => updateAddress('barangay', event.target.value)}
-          >
-            <option value="">Choose a barangay</option>
-            {CEBU_BARANGAYS.filter(
-              (name) =>
-                name === address.barangay ||
-                name.toLowerCase().includes(search.trim().toLowerCase()),
-            ).map((name) => (
-              <option key={name}>{name}</option>
-            ))}
-          </select>
-          {errors.barangay && (
-            <small id={id + 'barangay-error'} role="alert">
-              {errors.barangay}
-            </small>
-          )}
-          {search &&
-            !CEBU_BARANGAYS.some((name) =>
-              name.toLowerCase().includes(search.trim().toLowerCase()),
-            ) && <small role="status">No matching barangays. Try another spelling.</small>}
+            options={(cityLocation(address)?.barangays ?? []).map((name) => ({
+              value: name,
+              label: name,
+            }))}
+            placeholder={
+              cityLocation(address) ? 'Choose a barangay' : 'Choose a city or municipality first'
+            }
+            disabled={!cityLocation(address)}
+            error={errors.barangay}
+            onChange={(value) => updateAddress('barangay', value)}
+          />
           <label htmlFor={id + 'street'}>Street, building, or unit (optional)</label>
           <input
             id={id + 'street'}
@@ -153,8 +151,8 @@ export function CebuContactFields({
           />
           {error('postal_code')}
           <small>
-            Your portfolio shows Cebu City, Philippines. Detailed address fields are retained here
-            and accessible to authorized admins.
+            Your portfolio shows {addressSummary(address)}. Detailed address fields are retained
+            here and accessible to authorized admins.
           </small>
         </>
       ) : (
@@ -167,7 +165,7 @@ export function CebuContactFields({
             className="text-button"
             onClick={() => onChange({ ...draft, cebu_address: emptyCebuAddress() })}
           >
-            Use Cebu City address fields
+            Use Cebu address fields
           </button>
         </>
       )}

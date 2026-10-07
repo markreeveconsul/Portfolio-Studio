@@ -1,5 +1,7 @@
 import {
-  CEBU_BARANGAYS,
+  cityLocation,
+  cityCode,
+  addressSummary,
   emptyCebuAddress,
   normalizePhilippinePhone,
   validPhilippinePhone,
@@ -93,9 +95,10 @@ export function validatePortfolio(
     full_name: input.full_name.trim(),
     email: input.email.trim(),
     contact_number: input.contact_number.trim(),
-    address: input.cebu_address ? 'Cebu City, Philippines' : input.address.trim(),
+    address: input.cebu_address ? addressSummary(input.cebu_address) : input.address.trim(),
     cebu_address: input.cebu_address
       ? {
+          city_code: cityCode(input.cebu_address),
           barangay: input.cebu_address.barangay.trim(),
           street: input.cebu_address.street.trim(),
           postal_code: input.cebu_address.postal_code.trim(),
@@ -116,8 +119,10 @@ export function validatePortfolio(
   }
   if (draft.cebu_address) {
     const address = draft.cebu_address;
-    if (address.barangay && !CEBU_BARANGAYS.includes(address.barangay))
-      errors.barangay = 'Choose a Cebu City barangay from the list.';
+    if (cityCode(address) && !cityLocation(address))
+      errors.city_code = 'Choose a city or municipality in Cebu.';
+    if (address.barangay && !cityLocation(address)?.barangays.includes(address.barangay))
+      errors.barangay = 'Choose a barangay belonging to the selected city or municipality.';
     if (address.street.length > 200)
       errors.street = 'Keep the street or building within 200 characters.';
     if (address.postal_code && !/^\d{4}$/.test(address.postal_code))

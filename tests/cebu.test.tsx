@@ -33,15 +33,72 @@ test('preserves legacy contact details and validates new structured fields', () 
   expect(result.errors.postal_code).toBeTruthy();
   expect(result.draft.address).toBe('Cebu City, Philippines');
 });
-test('filters barangays without losing the selected value', () => {
+test('searches inside the dropdown and clears dependent values when city changes', () => {
   function Form() {
-    const [draft, setDraft] = useState(emptyDraft());
+    const [draft, setDraft] = useState({
+      ...emptyDraft(),
+      cebu_address: {
+        city_code: '0730600000',
+        barangay: 'Lahug',
+        street: 'Sample',
+        postal_code: '6000',
+      },
+    });
     return <CebuContactFields draft={draft} errors={{}} onChange={setDraft} />;
   }
   render(<Form />);
-  fireEvent.change(screen.getByLabelText('Search barangays'), { target: { value: 'lah' } });
-  fireEvent.change(screen.getByLabelText('Barangay (optional)'), { target: { value: 'Lahug' } });
-  fireEvent.change(screen.getByLabelText('Search barangays'), { target: { value: 'tisa' } });
-  expect((screen.getByLabelText('Barangay (optional)') as HTMLSelectElement).value).toBe('Lahug');
+  expect(screen.queryByLabelText('Search barangays')).toBeNull();
+  const barangay = screen.getByRole('combobox', { name: 'Barangay (optional)' });
+  fireEvent.click(barangay);
+  fireEvent.change(barangay, { target: { value: 'tis' } });
   expect(screen.getByRole('option', { name: 'Tisa' })).toBeTruthy();
+  fireEvent.keyDown(barangay, { key: 'ArrowDown' });
+  fireEvent.keyDown(barangay, { key: 'Enter' });
+  expect((barangay as HTMLInputElement).value).toBe('Tisa');
+  const city = screen.getByRole('combobox', { name: 'City / municipality (optional)' });
+  fireEvent.click(city);
+  fireEvent.change(city, { target: { value: 'lapu' } });
+  fireEvent.click(screen.getByRole('option', { name: 'Lapu-Lapu City' }));
+  expect(
+    (screen.getByRole('combobox', { name: 'Barangay (optional)' }) as HTMLInputElement).value,
+  ).toBe('');
+  expect((screen.getByLabelText('Postal code (optional)') as HTMLInputElement).value).toBe('');
+  fireEvent.click(screen.getByRole('combobox', { name: 'Barangay (optional)' }));
+  expect(screen.queryByRole('option', { name: 'Lahug' })).toBeNull();
+  expect(screen.getByRole('option', { name: 'Pajo' })).toBeTruthy();
+});
+test('Escape discards search without changing the saved selection', () => {
+  render(
+    <CebuContactFields
+      draft={{
+        ...emptyDraft(),
+        cebu_address: { city_code: '0730600000', barangay: 'Lahug', street: '', postal_code: '' },
+      }}
+      errors={{}}
+      onChange={() => {}}
+    />,
+  );
+  const input = screen.getByRole('combobox', { name: 'Barangay (optional)' });
+  fireEvent.click(input);
+  fireEvent.change(input, { target: { value: 'no such place' } });
+  expect(screen.getByText('No matches. Try another spelling.')).toBeTruthy();
+  fireEvent.keyDown(input, { key: 'Escape' });
+  expect((input as HTMLInputElement).value).toBe('Lahug');
+  expect(screen.queryByRole('listbox')).toBeNull();
+});
+test('requires a city before barangay selection and validates city/barangay pairing', () => {
+  render(<CebuContactFields draft={emptyDraft()} errors={{}} onChange={() => {}} />);
+  expect(
+    (screen.getByRole('combobox', { name: 'Barangay (optional)' }) as HTMLInputElement).disabled,
+  ).toBe(true);
+  const draft = {
+    ...emptyDraft(),
+    full_name: 'Alex',
+    cebu_address: { city_code: '0731100000', barangay: 'Lahug', street: '', postal_code: '' },
+  };
+  expect(validatePortfolio(draft).errors.barangay).toBeTruthy();
+  expect(
+    validatePortfolio({ ...draft, cebu_address: { ...draft.cebu_address, barangay: 'Pajo' } }).draft
+      .address,
+  ).toBe('Lapu-Lapu City, Philippines');
 });

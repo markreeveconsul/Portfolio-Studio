@@ -540,6 +540,113 @@ test('database migrations, access boundaries, and atomic personal saves', async 
         0,
       );
     });
+    await t.test(
+      'Cebu coverage rejects mismatched barangays and supports all selected locations',
+      async () => {
+        await db.exec('reset role;');
+        await db.exec(
+          await readFile(
+            new URL('../supabase/migrations/006_cebu_province.sql', import.meta.url),
+            'utf8',
+          ),
+        );
+        await asUser(b);
+        const locations = JSON.parse(
+          await readFile(
+            new URL('../src/features/portfolio/cebu-locations.json', import.meta.url),
+            'utf8',
+          ),
+        );
+        assert.equal(locations.length, 53);
+        assert.equal(
+          locations.reduce((count, city) => count + city.barangays.length, 0),
+          1203,
+        );
+        assert.equal(new Set(locations.map((city) => city.code)).size, 53);
+        const addresses = locations.flatMap((city) =>
+          city.barangays.map((barangay) => ({
+            city_code: city.code,
+            barangay,
+            street: '',
+            postal_code: '',
+          })),
+        );
+        const checked = await db.query(
+          'select bool_and(public.valid_cebu_location(value)) as valid from jsonb_array_elements($1::jsonb)',
+          [JSON.stringify(addresses)],
+        );
+        assert.equal(checked.rows[0].valid, true);
+        for (const address of [
+          { city_code: '0731100000', barangay: 'Pajo', street: '', postal_code: '6015' },
+          { city_code: '0731300000', barangay: 'Banilad', street: '', postal_code: '6014' },
+          { city_code: '0702201000', barangay: 'Cabadiangan', street: '', postal_code: '' },
+          { city_code: '', barangay: '', street: '', postal_code: '' },
+          { barangay: 'Lahug', street: '', postal_code: '6000' },
+        ]) {
+          assert.equal(
+            (
+              await db.query('select public.valid_cebu_location($1::jsonb) as valid', [
+                JSON.stringify(address),
+              ])
+            ).rows[0].valid,
+            true,
+          );
+        }
+        for (const address of [
+          { city_code: '0731100000', barangay: 'Lahug', street: '', postal_code: '' },
+          { city_code: '9999999999', barangay: '', street: '', postal_code: '' },
+          { city_code: '', barangay: 'Lahug', street: '', postal_code: '' },
+          { city_code: null, barangay: '', street: '', postal_code: '' },
+        ])
+          assert.equal(
+            (
+              await db.query('select public.valid_cebu_location($1::jsonb) as valid', [
+                JSON.stringify(address),
+              ])
+            ).rows[0].valid,
+            false,
+          );
+        const before = (await db.query('select * from public.portfolios where owner_id=$1', [b]))
+          .rows[0];
+        const params = [
+          'Expanded Cebu',
+          '',
+          '',
+          'Old address',
+          '',
+          '[]',
+          '[]',
+          '[]',
+          '[]',
+          '[]',
+          before.updated_at,
+          JSON.stringify({
+            city_code: '0731100000',
+            barangay: 'Pajo',
+            street: '',
+            postal_code: '6015',
+          }),
+        ];
+        const query =
+          'select public.save_cebu_portfolio($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11::timestamptz,$12::jsonb) as portfolio';
+        const saved = (await db.query(query, params)).rows[0].portfolio;
+        assert.equal(saved.address, 'Lapu-Lapu City, Philippines');
+        assert.equal(saved.cebu_address.barangay, 'Pajo');
+        params[10] = saved.updated_at;
+        params[11] = JSON.stringify({
+          city_code: '0731100000',
+          barangay: 'Lahug',
+          street: '',
+          postal_code: '',
+        });
+        await assert.rejects(db.query(query, params), (e) => e.code === '23514');
+        assert.equal(
+          (await db.query('select cebu_address from public.portfolios where owner_id=$1', [b]))
+            .rows[0].cebu_address.barangay,
+          'Pajo',
+        );
+      },
+    );
   } finally {
     await db.close();
   }
