@@ -1,3 +1,4 @@
+import { CebuContactFields } from './CebuContactFields';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Icon } from '../../components/Icon';
@@ -94,7 +95,7 @@ export function PortfolioEditor({
   }, [view, loading]);
 
   function update(
-    field: keyof Omit<PortfolioDraft, 'social_links' | keyof SectionData>,
+    field: keyof Omit<PortfolioDraft, 'social_links' | 'cebu_address' | keyof SectionData>,
     value: string,
   ) {
     setDraft((previous) => ({ ...previous, [field]: value }));
@@ -109,7 +110,7 @@ export function PortfolioEditor({
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current || photoBusy) return;
-    const { draft: normalized, errors } = validatePortfolio(draft);
+    const { draft: normalized, errors } = validatePortfolio(draft, baseline.contact_number);
     setFieldErrors(errors);
     setSaveError('');
     setSaveNotice('');
@@ -222,7 +223,7 @@ export function PortfolioEditor({
     );
 
   const fields: {
-    key: keyof Omit<PortfolioDraft, 'social_links' | keyof SectionData>;
+    key: keyof Omit<PortfolioDraft, 'social_links' | 'cebu_address' | keyof SectionData>;
     label: string;
     type: string;
     limit: number;
@@ -350,38 +351,49 @@ export function PortfolioEditor({
         )}
         <fieldset disabled={saving || photoBusy}>
           <div className="personal-fields">
-            {fields.map((field) => (
-              <div
-                className={`field ${field.key === 'full_name' || field.key === 'address' ? 'wide' : ''}`}
-                key={field.key}
-              >
-                <label htmlFor={`${id}-${field.key}`}>
-                  {field.label}
-                  {field.key !== 'full_name' && <span>Optional</span>}
-                </label>
-                <input
-                  id={`${id}-${field.key}`}
-                  name={field.key}
-                  type={field.type}
-                  value={draft[field.key]}
-                  onChange={(event) => update(field.key, event.target.value)}
-                  maxLength={field.limit}
-                  placeholder={field.placeholder}
-                  autoComplete={field.autoComplete}
-                  required={field.key === 'full_name'}
-                  aria-invalid={Boolean(fieldErrors[field.key])}
-                  aria-describedby={`${id}-${field.key}-help`}
-                />
-                <div id={`${id}-${field.key}-help`}>
-                  {fieldErrors[field.key] ? (
-                    <p className="field-error">{fieldErrors[field.key]}</p>
-                  ) : field.hint ? (
-                    <p className="field-hint">{field.hint}</p>
-                  ) : null}
+            {fields
+              .filter((field) => field.key !== 'address' && field.key !== 'contact_number')
+              .map((field) => (
+                <div
+                  className={`field ${field.key === 'full_name' || field.key === 'address' ? 'wide' : ''}`}
+                  key={field.key}
+                >
+                  <label htmlFor={`${id}-${field.key}`}>
+                    {field.label}
+                    {field.key !== 'full_name' && <span>Optional</span>}
+                  </label>
+                  <input
+                    id={`${id}-${field.key}`}
+                    name={field.key}
+                    type={field.type}
+                    value={draft[field.key]}
+                    onChange={(event) => update(field.key, event.target.value)}
+                    maxLength={field.limit}
+                    placeholder={field.placeholder}
+                    autoComplete={field.autoComplete}
+                    required={field.key === 'full_name'}
+                    aria-invalid={Boolean(fieldErrors[field.key])}
+                    aria-describedby={`${id}-${field.key}-help`}
+                  />
+                  <div id={`${id}-${field.key}-help`}>
+                    {fieldErrors[field.key] ? (
+                      <p className="field-error">{fieldErrors[field.key]}</p>
+                    ) : field.hint ? (
+                      <p className="field-hint">{field.hint}</p>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
+          <CebuContactFields
+            draft={draft}
+            errors={fieldErrors}
+            onChange={(next) => {
+              setDraft(next);
+              setFieldErrors({});
+              setSaveNotice('');
+            }}
+          />
           <div className="field about-field">
             <label htmlFor={`${id}-about_me`}>
               About me <span>Optional</span>

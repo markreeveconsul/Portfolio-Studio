@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase';
 import type { Portfolio, PortfolioRepository, PortfolioSummary } from './model';
 
 const selection =
-  'id,owner_id,full_name,email,contact_number,address,about_me,photo_path,template,created_at,updated_at,social_links(label,url,position),education(institution,qualification,start_date,end_date,position),skills(name,position),projects(title,description,project_url,repository_url,position),experience(organization,role_title,description,start_date,end_date,position)';
+  'id,owner_id,full_name,email,contact_number,address,cebu_address,about_me,photo_path,template,created_at,updated_at,social_links(label,url,position),education(institution,qualification,start_date,end_date,position),skills(name,position),projects(title,description,project_url,repository_url,position),experience(organization,role_title,description,start_date,end_date,position)';
 type PortfolioRow = Omit<Portfolio, 'social_links'> & {
   social_links: { label: string; url: string; position: number }[];
 };
@@ -62,11 +62,12 @@ export const portfolioRepository: PortfolioRepository = {
     return data ? fromRow(data as PortfolioRow) : null;
   },
   async savePortfolio(draft, expectedUpdatedAt) {
-    const { data, error } = await client().rpc('save_portfolio_information', {
+    const { data, error } = await client().rpc('save_cebu_portfolio', {
       p_full_name: draft.full_name,
       p_email: draft.email,
       p_contact_number: draft.contact_number,
       p_address: draft.address,
+      p_cebu_address: draft.cebu_address ?? null,
       p_about_me: draft.about_me,
       p_social_links: draft.social_links,
       p_education: draft.education,

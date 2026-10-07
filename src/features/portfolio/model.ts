@@ -1,3 +1,10 @@
+import {
+  CEBU_BARANGAYS,
+  emptyCebuAddress,
+  normalizePhilippinePhone,
+  validPhilippinePhone,
+} from './cebu';
+import type { CebuAddress } from './cebu';
 import { safeWebUrl } from './urls';
 export { safeWebUrl } from './urls';
 import type { SectionData } from './sections';
@@ -13,6 +20,7 @@ export interface PortfolioDraft extends SectionData {
   email: string;
   contact_number: string;
   address: string;
+  cebu_address?: CebuAddress | null;
   about_me: string;
   social_links: SocialLink[];
 }
@@ -46,6 +54,7 @@ export function emptyDraft(): PortfolioDraft {
     email: '',
     contact_number: '',
     address: '',
+    cebu_address: emptyCebuAddress(),
     about_me: '',
     social_links: [],
     education: [],
@@ -65,12 +74,16 @@ export function toDraft(portfolio: Portfolio): PortfolioDraft {
     email: portfolio.email,
     contact_number: portfolio.contact_number,
     address: portfolio.address,
+    cebu_address: portfolio.cebu_address ? { ...portfolio.cebu_address } : null,
     about_me: portfolio.about_me,
     social_links: portfolio.social_links.map(({ label, url }) => ({ label, url })),
   };
 }
 
-export function validatePortfolio(input: PortfolioDraft): {
+export function validatePortfolio(
+  input: PortfolioDraft,
+  previousPhone = '',
+): {
   draft: PortfolioDraft;
   errors: FieldErrors;
 } {
@@ -80,7 +93,14 @@ export function validatePortfolio(input: PortfolioDraft): {
     full_name: input.full_name.trim(),
     email: input.email.trim(),
     contact_number: input.contact_number.trim(),
-    address: input.address.trim(),
+    address: input.cebu_address ? 'Cebu City, Philippines' : input.address.trim(),
+    cebu_address: input.cebu_address
+      ? {
+          barangay: input.cebu_address.barangay.trim(),
+          street: input.cebu_address.street.trim(),
+          postal_code: input.cebu_address.postal_code.trim(),
+        }
+      : null,
     about_me: input.about_me.trim(),
     social_links: input.social_links.map(({ label, url }) => ({
       label: label.trim(),
@@ -88,6 +108,21 @@ export function validatePortfolio(input: PortfolioDraft): {
     })),
   };
   const errors: FieldErrors = { ...sectionErrors };
+  if (draft.contact_number !== previousPhone.trim()) {
+    draft.contact_number = normalizePhilippinePhone(draft.contact_number);
+    if (!validPhilippinePhone(draft.contact_number))
+      errors.contact_number =
+        'Enter a Philippine mobile number (09 followed by 9 digits), or a Cebu landline including area code 032.';
+  }
+  if (draft.cebu_address) {
+    const address = draft.cebu_address;
+    if (address.barangay && !CEBU_BARANGAYS.includes(address.barangay))
+      errors.barangay = 'Choose a Cebu City barangay from the list.';
+    if (address.street.length > 200)
+      errors.street = 'Keep the street or building within 200 characters.';
+    if (address.postal_code && !/^\d{4}$/.test(address.postal_code))
+      errors.postal_code = 'Enter a four-digit postal code, or leave it empty.';
+  }
   if (!draft.full_name) errors.full_name = 'Enter your full name.';
   if (draft.full_name.length > 120) errors.full_name = 'Keep your name within 120 characters.';
   if (draft.email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email) || draft.email.length > 254))

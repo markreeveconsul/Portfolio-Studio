@@ -32,25 +32,35 @@ test('database migrations, access boundaries, and atomic personal saves', async 
       '002_personal_information.sql',
       '003_portfolio_sections.sql',
       '004_portfolio_deletion.sql',
+      '005_cebu_contact.sql',
     ]) {
       await db.exec(
         await readFile(new URL(`../supabase/migrations/${migration}`, import.meta.url), 'utf8'),
       );
     }
-    await t.test('readiness inventory passes installed schema and detects a public photo bucket', async () => {
-      const audit = await readFile(new URL('../supabase/tests/deployment-readiness.sql', import.meta.url), 'utf8');
-      const baseline = await db.query(audit);
-      assert.equal(baseline.rows.length, 13);
-      assert.ok(baseline.rows.every(row => row.result === 'PASS'));
-      await db.exec('begin;');
-      try {
-        await db.exec("update storage.buckets set public=true where id='profile-photos';");
-        const changed = await db.query(audit);
-        assert.equal(changed.rows.find(row => row.check_name.startsWith('Profile photo bucket')).result, 'CHECK REQUIRED');
-      } finally {
-        await db.exec('rollback;');
-      }
-    });
+    await t.test(
+      'readiness inventory passes installed schema and detects a public photo bucket',
+      async () => {
+        const audit = await readFile(
+          new URL('../supabase/tests/deployment-readiness.sql', import.meta.url),
+          'utf8',
+        );
+        const baseline = await db.query(audit);
+        assert.equal(baseline.rows.length, 13);
+        assert.ok(baseline.rows.every((row) => row.result === 'PASS'));
+        await db.exec('begin;');
+        try {
+          await db.exec("update storage.buckets set public=true where id='profile-photos';");
+          const changed = await db.query(audit);
+          assert.equal(
+            changed.rows.find((row) => row.check_name.startsWith('Profile photo bucket')).result,
+            'CHECK REQUIRED',
+          );
+        } finally {
+          await db.exec('rollback;');
+        }
+      },
+    );
     await t.test('the supplied owner/admin/anonymous RLS assertions pass', async () => {
       await db.exec(
         await readFile(new URL('../supabase/tests/access-control.sql', import.meta.url), 'utf8'),
@@ -483,6 +493,53 @@ test('database migrations, access boundaries, and atomic personal saves', async 
         assert.equal((await db.query('select id from auth.users where id=$1', [a])).rows.length, 1);
       },
     );
+    await t.test('Cebu save preserves legacy data and rolls back invalid addresses', async () => {
+      await asUser(b);
+      const current = (await db.query('select * from public.portfolios where owner_id=$1', [b]))
+        .rows[0];
+      const call = (address, revision) =>
+        db.query(
+          'select public.save_cebu_portfolio($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11::timestamptz,$12::jsonb) as portfolio',
+          [
+            'Cebu test',
+            '',
+            '+639171234567',
+            'Legacy address',
+            '',
+            '[]',
+            '[]',
+            '[]',
+            '[]',
+            '[]',
+            revision,
+            address === null ? null : JSON.stringify(address),
+          ],
+        );
+      const legacy = (await call(null, current?.updated_at ?? null)).rows[0].portfolio;
+      assert.equal(legacy.address, 'Legacy address');
+      await assert.rejects(
+        call({ barangay: 'Not a barangay', street: '', postal_code: '6000' }, legacy.updated_at),
+        (e) => e.code === '23514',
+      );
+      const unchanged = (await db.query('select * from public.portfolios where owner_id=$1', [b]))
+        .rows[0];
+      assert.equal(unchanged.address, 'Legacy address');
+      const saved = (
+        await call(
+          { barangay: 'Lahug', street: 'Sample street', postal_code: '6000' },
+          legacy.updated_at,
+        )
+      ).rows[0].portfolio;
+      assert.equal(saved.address, 'Cebu City, Philippines');
+      assert.equal(saved.cebu_address.postal_code, '6000');
+      await assert.rejects(call(null, legacy.updated_at), (e) => e.code === 'P0002');
+      await asUser(a);
+      assert.equal(
+        (await db.query('select cebu_address from public.portfolios where owner_id=$1', [b])).rows
+          .length,
+        0,
+      );
+    });
   } finally {
     await db.close();
   }
