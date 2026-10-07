@@ -1,4 +1,5 @@
-export type TemplateName = 'simple' | 'modern' | 'creative';
+import { TemplateThumbnail } from './TemplateThumbnail';
+export type TemplateName = 'simple' | 'modern' | 'creative' | 'resume' | 'showcase';
 export const templates: { id: TemplateName; label: string; description: string; tag: string }[] = [
   {
     id: 'simple',
@@ -18,6 +19,18 @@ export const templates: { id: TemplateName; label: string; description: string; 
     description: 'An expressive introduction with room to explore.',
     tag: 'Bold & expressive',
   },
+  {
+    id: 'resume',
+    label: 'Professional Résumé',
+    description: 'A focused record of your experience and skills.',
+    tag: 'Clear & professional',
+  },
+  {
+    id: 'showcase',
+    label: 'Project Showcase',
+    description: 'Give your projects the space to speak for themselves.',
+    tag: 'Work comes first',
+  },
 ];
 
 // Fictional content only. These visual studies are not saved user portfolios.
@@ -30,6 +43,9 @@ export function TemplatePreview({
 }) {
   return (
     <div className={`template-art ${template} ${large ? 'large' : ''}`}>
+      {(template === 'resume' || template === 'showcase') && (
+        <TemplateThumbnail template={template} />
+      )}
       {template === 'simple' && (
         <>
           <div className="sample-topline">

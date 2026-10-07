@@ -54,7 +54,43 @@ export function CebuContactFields({
       ) : (
         <>
           <div className="cebu-phone">
-            <span>+63</span>
+            <span className="cebu-phone-prefix" id={id + 'phone-prefix'}>
+              <svg
+                className="philippine-flag"
+                viewBox="0 0 60 30"
+                width="28"
+                height="14"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path fill="#0038a8" d="M0 0h60v15H0z" />
+                <path fill="#ce1126" d="M0 15h60v15H0z" />
+                <path fill="#fff" d="M0 0L26 15 0 30z" />
+                <circle cx="10" cy="15" r="3" fill="#fcd116" />
+                <path d="M 13.70 15.00 L 15.50 15.00" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 12.62 17.62 L 13.89 18.89" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 10.00 18.70 L 10.00 20.50" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 7.38 17.62 L 6.11 18.89" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 6.30 15.00 L 4.50 15.00" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 7.38 12.38 L 6.11 11.11" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 10.00 11.30 L 10.00 9.50" stroke="#fcd116" strokeWidth="1.4" />
+                <path d="M 12.62 12.38 L 13.89 11.11" stroke="#fcd116" strokeWidth="1.4" />
+                <polygon
+                  fill="#fcd116"
+                  points="3.50,2.60 3.95,3.89 5.31,3.91 4.22,4.73 4.62,6.04 3.50,5.26 2.38,6.04 2.78,4.73 1.69,3.91 3.05,3.89"
+                />
+                <polygon
+                  fill="#fcd116"
+                  points="3.50,23.60 3.95,24.89 5.31,24.91 4.22,25.73 4.62,27.04 3.50,26.26 2.38,27.04 2.78,25.73 1.69,24.91 3.05,24.89"
+                />
+                <polygon
+                  fill="#fcd116"
+                  points="21.50,13.10 21.95,14.39 23.31,14.41 22.22,15.23 22.62,16.54 21.50,15.76 20.38,16.54 20.78,15.23 19.69,14.41 21.05,14.39"
+                />
+              </svg>
+              <span className="sr-only">Philippines country code </span>
+              <span>+63</span>
+            </span>
             <input
               id={id + 'phone'}
               name="contact_number"
@@ -63,7 +99,7 @@ export function CebuContactFields({
               value={draft.contact_number.replace(/^\+63/, '')}
               placeholder="917 123 4567"
               aria-invalid={!!errors.contact_number}
-              aria-describedby={errors.contact_number ? id + 'contact_number' : id + 'phone-help'}
+              aria-describedby={`${id}phone-prefix ${errors.contact_number ? id + 'contact_number' : id + 'phone-help'}`}
               onChange={(event) => {
                 const value = event.target.value;
                 onChange({

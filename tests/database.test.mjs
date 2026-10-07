@@ -647,6 +647,49 @@ test('database migrations, access boundaries, and atomic personal saves', async 
         );
       },
     );
+    await t.test('new templates survive upgrade and remain owner-only', async () => {
+      await db.exec('reset role;');
+      await db.exec(
+        await readFile(
+          new URL('../supabase/migrations/007_professional_templates.sql', import.meta.url),
+          'utf8',
+        ),
+      );
+      await asUser(b);
+      const before = (await db.query('select * from public.portfolios where owner_id=$1', [b]))
+        .rows[0];
+      for (const template of ['resume', 'showcase']) {
+        const saved = (
+          await db.query('update public.portfolios set template=$1 where id=$2 returning *', [
+            template,
+            before.id,
+          ])
+        ).rows[0];
+        assert.equal(saved.template, template);
+        assert.equal(saved.full_name, before.full_name);
+        assert.deepEqual(saved.cebu_address, before.cebu_address);
+        assert.equal(saved.photo_path, before.photo_path);
+      }
+      await assert.rejects(
+        db.query("update public.portfolios set template='unknown' where id=$1", [before.id]),
+        (e) => e.code === '23514',
+      );
+      await asUser(admin);
+      assert.equal(
+        (
+          await db.query(
+            "update public.portfolios set template='resume' where id=$1 returning id",
+            [before.id],
+          )
+        ).rows.length,
+        0,
+      );
+      assert.equal(
+        (await db.query('select template from public.portfolios where id=$1', [before.id])).rows[0]
+          .template,
+        'showcase',
+      );
+    });
   } finally {
     await db.close();
   }

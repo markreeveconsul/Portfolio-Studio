@@ -1,0 +1,63 @@
+.template-thumbnail {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid #dbe2d7;
+  border-radius: 4px;
+}
+.template-picker .template-options {
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+}
+.template-picker .template-option {
+  position: relative;
+  display: block;
+  padding: 12px;
+  min-width: 0;
+}
+.template-picker .template-option input {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.template-picker .template-option > span {
+  display: block;
+  margin-top: 14px;
+}
+.template-picker .template-option:has(input:focus-visible) {
+  outline: 3px solid #9b731d;
+  outline-offset: 3px;
+}
+.template-art.resume,
+.template-art.showcase {
+  display: flex;
+  align-items: center;
+  padding: 22px;
+  background: #eef1ec;
+}
+.template-art.resume .template-thumbnail,
+.template-art.showcase .template-thumbnail {
+  border-radius: 0;
+  box-shadow: 0 8px 24px #21362a12;
+}
+@media (max-width: 480px) {
+  .template-picker .template-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .template-picker .template-option {
+    padding: 9px;
+  }
+  .template-picker .template-option b {
+    font-size: 12px;
+  }
+  .template-picker .template-option small {
+    font-size: 11px;
+  }
+  .template-picker .template-option input {
+    right: 14px;
+    top: 14px;
+  }
+}

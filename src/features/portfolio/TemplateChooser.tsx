@@ -1,3 +1,4 @@
+import { TemplateThumbnail } from '../../components/TemplateThumbnail';
 import { useRef, useState } from 'react';
 import type { Portfolio, PortfolioRepository } from './model';
 import { saveErrorMessage } from './model';
@@ -7,6 +8,16 @@ import { PortfolioView } from './PortfolioView';
 const choices = [
   { id: 'simple', name: 'Simple', description: 'A quiet, single-column introduction.' },
   { id: 'modern', name: 'Modern', description: 'A structured sidebar with room for your work.' },
+  {
+    id: 'resume',
+    name: 'Professional Résumé',
+    description: 'Compact, clear sections for applications and internships.',
+  },
+  {
+    id: 'showcase',
+    name: 'Project Showcase',
+    description: 'A project-first layout with numbered work entries.',
+  },
   { id: 'creative', name: 'Creative', description: 'Bold type, warm color, and project cards.' },
 ] as const;
 export function TemplateChooser({
@@ -58,6 +69,7 @@ export function TemplateChooser({
               key={choice.id}
               className={`template-option ${selected === choice.id ? 'chosen' : ''}`}
             >
+              <TemplateThumbnail template={choice.id} />
               <input
                 type="radio"
                 name="portfolio-template"

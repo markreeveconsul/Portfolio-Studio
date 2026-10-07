@@ -31,7 +31,7 @@ export interface Portfolio extends PortfolioDraft {
   photo_path?: string | null;
   id: string;
   owner_id: string;
-  template: 'simple' | 'modern' | 'creative';
+  template: 'simple' | 'modern' | 'creative' | 'resume' | 'showcase';
   created_at: string;
   updated_at: string;
 }

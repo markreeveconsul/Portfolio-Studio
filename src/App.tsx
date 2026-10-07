@@ -301,7 +301,7 @@ export function App() {
               <div className="container process-grid">
                 {[
                   ['01', 'Tell your story', 'Add the details that make you, you.'],
-                  ['02', 'Find your style', 'Choose from three distinct templates.'],
+                  ['02', 'Find your style', 'Choose from five distinct templates.'],
                   ['03', 'Make it yours', 'Preview, refine, and keep it up to date.'],
                 ].map(([n, heading, copy]) => (
                   <div className="process-item" key={n}>
@@ -325,7 +325,7 @@ export function App() {
                   </h2>
                 </div>
                 <p>
-                  One story. Three different perspectives.
+                  One story. Five different perspectives.
                   <br />
                   Start with the one that feels right.
                 </p>

@@ -1,0 +1,188 @@
+.real-portfolio.portfolio-resume {
+  max-width: 850px;
+  padding: 48px 54px;
+  border-radius: 0;
+  color: #202c35;
+  box-shadow: 0 8px 30px #10202b08;
+}
+.professional-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 2px solid #273a46;
+  padding-bottom: 26px;
+}
+.professional-heading > div {
+  min-width: 0;
+}
+.professional-heading .private-photo {
+  flex-shrink: 0;
+}
+.professional-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+  color: #58636b;
+}
+.professional-heading h2 {
+  font-family: Georgia, serif;
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-top: 12px;
+}
+.real-portfolio.portfolio-resume .portfolio-section {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-color: #d8dde0;
+}
+.real-portfolio.portfolio-resume .portfolio-section h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #273a46;
+  margin-bottom: 13px;
+}
+.real-portfolio.portfolio-resume .portfolio-entry {
+  position: relative;
+}
+.real-portfolio.portfolio-resume .portfolio-entry + .portfolio-entry {
+  margin-top: 18px;
+}
+.real-portfolio.portfolio-resume .portfolio-entry p,
+.real-portfolio.portfolio-resume .portfolio-section > p {
+  color: #45515a;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.real-portfolio.portfolio-resume .skill-tags {
+  gap: 8px 18px;
+}
+.real-portfolio.portfolio-resume .skill-tags li {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+}
+.real-portfolio.portfolio-resume .portfolio-contact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 22px;
+}
+.real-portfolio.portfolio-resume .portfolio-contact > div {
+  display: block;
+}
+.real-portfolio.portfolio-resume .portfolio-contact dt {
+  font-size: 11px;
+}
+.real-portfolio.portfolio-showcase {
+  max-width: 1000px;
+  padding: 48px;
+  border-radius: 0;
+  color: #192c30;
+  background: #fff;
+  box-shadow: none;
+}
+.real-portfolio.portfolio-showcase .professional-heading {
+  border-bottom: 1px solid #192c30;
+  padding-bottom: 36px;
+}
+.real-portfolio.portfolio-showcase .professional-heading h2 {
+  font-family: Manrope, sans-serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 650;
+  letter-spacing: -2px;
+}
+.real-portfolio.portfolio-showcase .professional-summary {
+  border: 0;
+  max-width: 680px;
+  padding-top: 0;
+  margin-block: 30px 40px;
+}
+.real-portfolio.portfolio-showcase .portfolio-section h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.real-portfolio.portfolio-showcase .portfolio-projects {
+  counter-reset: project;
+}
+.real-portfolio.portfolio-showcase .portfolio-projects .portfolio-entry {
+  counter-increment: project;
+  position: relative;
+  padding: 28px 0 28px 62px;
+  margin: 0;
+  border-bottom: 1px solid #dce3e1;
+}
+.real-portfolio.portfolio-showcase .portfolio-projects .portfolio-entry::before {
+  content: counter(project, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 29px;
+  color: #46706e;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.real-portfolio.portfolio-showcase .portfolio-projects h4 {
+  font-size: 24px;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
+}
+.real-portfolio.portfolio-showcase .portfolio-projects p {
+  max-width: 660px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.real-portfolio.portfolio-showcase .project-links {
+  margin-top: 18px;
+  gap: 20px;
+}
+.showcase-support {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 44px;
+}
+.showcase-support > div {
+  min-width: 0;
+}
+.real-portfolio.portfolio-showcase .portfolio-contact > div {
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+.real-portfolio.portfolio-showcase .skill-tags li {
+  background: #f2f6f5;
+  border-color: #dce3e1;
+  border-radius: 3px;
+}
+@media (max-width: 760px) {
+  .real-portfolio.portfolio-resume,
+  .real-portfolio.portfolio-showcase {
+    padding: 28px 22px;
+  }
+  .professional-heading {
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .professional-heading h2 {
+    font-size: 32px;
+  }
+  .professional-heading .portfolio-photo {
+    width: 60px;
+    height: 60px;
+  }
+  .showcase-support {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .real-portfolio.portfolio-resume .portfolio-contact {
+    grid-template-columns: 1fr;
+  }
+  .real-portfolio.portfolio-showcase .portfolio-projects .portfolio-entry {
+    padding-left: 40px;
+  }
+  .real-portfolio.portfolio-showcase .portfolio-projects h4 {
+    font-size: 21px;
+  }
+}
