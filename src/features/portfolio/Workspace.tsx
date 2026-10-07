@@ -36,7 +36,7 @@ export function Workspace({
       ({ data, error: requestError }) => {
         if (!active) return;
         if (requestError)
-          setError('We could not verify your access. Check the database setup and try again.');
+          setError('We could not verify your access. Please try again in a moment.');
         else setIsAdmin(data === true);
         setChecking(false);
       },
@@ -100,11 +100,19 @@ export function Workspace({
         </span>
       </div>
       <nav className="workspace-tabs" aria-label="Workspace">
-        <a className={!adminPage ? 'selected' : ''} href="#dashboard">
+        <a
+          className={!adminPage ? 'selected' : ''}
+          aria-current={!adminPage ? 'page' : undefined}
+          href="#dashboard"
+        >
           My portfolio
         </a>
         {isAdmin && (
-          <a className={adminPage ? 'selected' : ''} href="#admin">
+          <a
+            className={adminPage ? 'selected' : ''}
+            aria-current={adminPage ? 'page' : undefined}
+            href="#admin"
+          >
             Admin workspace
           </a>
         )}

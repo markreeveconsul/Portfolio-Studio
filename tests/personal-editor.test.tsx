@@ -164,3 +164,45 @@ describe('private preview', () => {
     expect(screen.queryByRole('button', { name: /edit|delete|save/i })).toBeNull();
   });
 });
+
+it('saves without leaving the editor and enables photo selection after confirmation', async () => {
+  const repo = repository();
+  render(
+    <PortfolioEditor
+      ownerId="owner-1"
+      repository={repo}
+      onDirtyChange={vi.fn()}
+      photos={{ download: vi.fn(), save: vi.fn() }}
+    />,
+  );
+  await screen.findByRole('textbox', { name: 'Full name' });
+  expect((screen.getByLabelText('Photo file') as HTMLInputElement).disabled).toBe(true);
+  fillName('Alex Morgan');
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+  await waitFor(() =>
+    expect((screen.getByLabelText('Photo file') as HTMLInputElement).disabled).toBe(false),
+  );
+  expect(screen.getByRole('textbox', { name: 'Full name' })).toBeTruthy();
+  expect(screen.queryByRole('heading', { name: 'Your story, taking shape.' })).toBeNull();
+  expect(repo.savePortfolio).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('Saved to your private portfolio.')).toBeTruthy();
+});
+it('preserves draft and keeps photo selection locked when an in-place save fails', async () => {
+  const repo = repository({ savePortfolio: vi.fn().mockRejectedValue(new Error('offline')) });
+  render(
+    <PortfolioEditor
+      ownerId="owner-1"
+      repository={repo}
+      onDirtyChange={vi.fn()}
+      photos={{ download: vi.fn(), save: vi.fn() }}
+    />,
+  );
+  await screen.findByRole('textbox', { name: 'Full name' });
+  fillName('Keep this name');
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+  await screen.findByRole('alert');
+  expect((screen.getByRole('textbox', { name: 'Full name' }) as HTMLInputElement).value).toBe(
+    'Keep this name',
+  );
+  expect((screen.getByLabelText('Photo file') as HTMLInputElement).disabled).toBe(true);
+});

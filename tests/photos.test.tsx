@@ -102,7 +102,7 @@ it('previews locally and requires an explicit save', async () => {
       onBusy={vi.fn()}
     />,
   );
-  fireEvent.change(screen.getByLabelText('Choose a photo'), { target: { files: [file] } });
+  fireEvent.change(screen.getByLabelText('Photo file'), { target: { files: [file] } });
   await screen.findByAltText('Selected photo preview');
   expect(service.save).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Save photo' }));
@@ -119,3 +119,55 @@ it('downloads privately and revokes the temporary URL on unmount', async () => {
   unmount();
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-photo');
 });
+
+it('opens the native file input synchronously from the choose-photo button', () => {
+  const service = { download: vi.fn(), save: vi.fn() };
+  render(
+    <PhotoEditor
+      portfolio={{ ...portfolio, photo_path: null }}
+      disabled={false}
+      service={service}
+      onSaved={vi.fn()}
+      onBusy={vi.fn()}
+    />,
+  );
+  const picker = screen.getByLabelText('Photo file') as HTMLInputElement;
+  const openPicker = vi.spyOn(picker, 'click').mockImplementation(() => {});
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
+  expect(openPicker).toHaveBeenCalledTimes(1);
+  expect(service.save).not.toHaveBeenCalled();
+});
+
+it.each([null, portfolio])(
+  'explains why selection is unavailable before information is saved',
+  (saved) => {
+    const service = { download: vi.fn().mockResolvedValue(new Blob()), save: vi.fn() };
+    const { rerender } = render(
+      <PhotoEditor
+        portfolio={saved && { ...saved, photo_path: null }}
+        disabled={true}
+        service={service}
+        onSaved={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    const picker = screen.getByLabelText('Photo file') as HTMLInputElement;
+    const openPicker = vi.spyOn(picker, 'click').mockImplementation(() => {});
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
+    expect(screen.getByRole('alert').textContent).toContain('Save changes above first');
+    expect(openPicker).not.toHaveBeenCalled();
+    expect(picker.disabled).toBe(true);
+    rerender(
+      <PhotoEditor
+        portfolio={{ ...portfolio, photo_path: null }}
+        disabled={false}
+        service={service}
+        onSaved={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
+    expect(openPicker).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alert')).toBeNull();
+  },
+);

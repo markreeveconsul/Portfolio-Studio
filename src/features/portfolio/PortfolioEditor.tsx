@@ -1,3 +1,4 @@
+import './editor-ux.css';
 import { CebuContactFields } from './CebuContactFields';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
@@ -110,6 +111,8 @@ export function PortfolioEditor({
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current || photoBusy) return;
+    const stayInEditor =
+      (event.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'stay';
     const { draft: normalized, errors } = validatePortfolio(draft, baseline.contact_number);
     setFieldErrors(errors);
     setSaveError('');
@@ -131,7 +134,7 @@ export function PortfolioEditor({
       setBaseline(next);
       onDirtyChange(false);
       setSaveNotice('Saved to your private portfolio.');
-      setView('preview');
+      if (!stayInEditor) setView('preview');
     } catch (error) {
       if (mounted.current) setSaveError(saveErrorMessage(error));
     } finally {
@@ -271,10 +274,24 @@ export function PortfolioEditor({
       <aside className="editor-context">
         <p className="eyebrow">START WITH THE ESSENTIALS</p>
         <h2>
-          A little <br />
-          about you.
+          Build your
+          <br /> portfolio.
         </h2>
-        <p>Introduce yourself and give your work a personal starting point.</p>
+        <p>Start with your name. Add more whenever you’re ready.</p>
+        <ol className="editor-roadmap" aria-label="Portfolio setup">
+          <li>
+            <b>1. Introduce yourself</b>
+            <span>Save your name and any details you want to include.</span>
+          </li>
+          <li>
+            <b>2. Add a photo · optional</b>
+            <span>Save your information first, then upload your photo.</span>
+          </li>
+          <li>
+            <b>3. Choose your style</b>
+            <span>Use Save &amp; continue to preview and pick a template.</span>
+          </li>
+        </ol>
         <div className="editor-step">
           <span>01</span>
           <div>
@@ -283,6 +300,15 @@ export function PortfolioEditor({
           </div>
         </div>
         <nav className="section-jumps" aria-label="Portfolio sections">
+          <button
+            type="button"
+            className="text-button"
+            onClick={() =>
+              (formRef.current?.elements.namedItem('full_name') as HTMLElement | null)?.focus()
+            }
+          >
+            Introduction <span>Start here</span>
+          </button>
           {sectionDefinitions.map((section) => (
             <button
               type="button"
@@ -320,9 +346,46 @@ export function PortfolioEditor({
         noValidate
         aria-labelledby={`${id}-heading`}
       >
-        {saveNotice && (
+        {saveNotice && !dirty && (
           <p className="notice success" role="status">
             {saveNotice}
+          </p>
+        )}
+        <div className="editor-savebar">
+          <div>
+            <b>
+              {saving
+                ? 'Saving your information…'
+                : dirty
+                  ? 'You have unsaved changes'
+                  : saved
+                    ? 'Your information is saved'
+                    : 'Start with your name'}
+            </b>
+            <p>
+              {dirty
+                ? 'Save before adding a photo or leaving this page.'
+                : 'Save here to keep editing. Preview when you’re ready.'}
+            </p>
+          </div>
+          <button
+            className="button primary"
+            type="submit"
+            name="save-intent"
+            value="stay"
+            disabled={saving || photoBusy}
+          >
+            {saving ? 'Saving information…' : 'Save changes'}
+          </button>
+        </div>
+        {Object.keys(fieldErrors).length > 0 && (
+          <p className="form-error" role="alert">
+            Check the highlighted fields before continuing.
+          </p>
+        )}
+        {saveError && (
+          <p className="form-error" role="alert">
+            {saveError}
           </p>
         )}
         <div className="form-heading">
@@ -331,24 +394,12 @@ export function PortfolioEditor({
             <h2 id={`${id}-heading`} ref={headingRef} tabIndex={-1}>
               Make your introduction.
             </h2>
-            <p>Only your full name is required. Add the details that feel right.</p>
+            <p>Only your full name is required. Everything else is optional.</p>
           </div>
           <span className={`save-state ${dirty ? 'unsaved' : ''}`} role="status">
             {saving ? 'Saving…' : dirty ? 'Unsaved changes' : saved ? 'Saved' : 'Not saved yet'}
           </span>
         </div>
-        {photos && (
-          <PhotoEditor
-            portfolio={saved}
-            disabled={dirty || saving}
-            service={photos}
-            onBusy={setPhotoBusy}
-            onSaved={(result) => {
-              setSaved((previous) => (previous ? { ...previous, ...result } : previous));
-              setSaveNotice('');
-            }}
-          />
-        )}
         <fieldset disabled={saving || photoBusy}>
           <div className="personal-fields">
             {fields
@@ -385,6 +436,18 @@ export function PortfolioEditor({
                 </div>
               ))}
           </div>
+          {photos && (
+            <PhotoEditor
+              portfolio={saved}
+              disabled={dirty || saving}
+              service={photos}
+              onBusy={setPhotoBusy}
+              onSaved={(result) => {
+                setSaved((previous) => (previous ? { ...previous, ...result } : previous));
+                setSaveNotice('');
+              }}
+            />
+          )}
           <CebuContactFields
             draft={draft}
             errors={fieldErrors}
@@ -522,6 +585,13 @@ export function PortfolioEditor({
               setSaveNotice('');
             }}
           />
+          <div className="editor-next-step">
+            <b>Ready to see your portfolio?</b>
+            <p>
+              Save &amp; continue opens your private preview, where you can choose a template. You
+              can return to edit at any time.
+            </p>
+          </div>
           <div className="form-actions">
             <button type="button" className="text-button" onClick={reloadSaved}>
               Reload saved version
@@ -532,16 +602,6 @@ export function PortfolioEditor({
             </button>
           </div>
         </fieldset>
-        {Object.keys(fieldErrors).length > 0 && (
-          <p className="form-error" role="alert">
-            Check the highlighted fields before continuing.
-          </p>
-        )}
-        {saveError && (
-          <p className="form-error" role="alert">
-            {saveError}
-          </p>
-        )}
       </form>
     </div>
   );

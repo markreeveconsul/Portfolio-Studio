@@ -953,3 +953,20 @@
 .cleanup-notice {
   margin-top: 25px;
 }
+
+.photo-picker-button {
+  min-height: 44px;
+  margin-bottom: 12px;
+}
+.photo-controls > div {
+  max-width: 100%;
+}
+.photo-controls input[type='file'] {
+  width: 100%;
+  min-height: 44px;
+}
+.photo-controls input[type='file']::file-selector-button {
+  min-height: 44px;
+  margin-right: 8px;
+  padding: 8px 12px;
+}

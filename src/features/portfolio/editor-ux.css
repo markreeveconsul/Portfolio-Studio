@@ -1,0 +1,178 @@
+.editor-layout {
+  align-items: start;
+}
+.editor-context {
+  position: sticky;
+  top: 24px;
+}
+.editor-roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+  display: grid;
+  gap: 18px;
+}
+.editor-roadmap li {
+  border-left: 2px solid #d6dfce;
+  padding-left: 14px;
+}
+.editor-roadmap b {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.editor-roadmap span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.editor-context .editor-step {
+  display: none;
+}
+.editor-savebar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 18px;
+  background: #f3f7ee;
+  border: 1px solid #cfdbc5;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px #1939270a;
+  margin-bottom: 28px;
+}
+.editor-savebar b {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.editor-savebar p,
+.editor-next-step p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.editor-savebar .button {
+  flex-shrink: 0;
+}
+.personal-form .photo-editor {
+  margin-top: 24px;
+}
+.personal-form :is(input, textarea, select),
+.personal-form .repeat-section {
+  scroll-margin-top: 150px;
+}
+.editor-next-step {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #f7f9f3;
+  border: 1px solid var(--line);
+}
+.editor-next-step b {
+  font-size: 15px;
+}
+.editor-next-step + .form-actions {
+  margin-top: 16px;
+}
+.editor-layout .button,
+.editor-layout .text-button,
+.saved-preview .button {
+  min-height: 44px;
+}
+.editor-layout .remove-link {
+  width: 44px;
+  height: 44px;
+}
+.editor-layout .link-row {
+  grid-template-columns: 1fr 1.5fr 44px;
+}
+.editor-layout :is(.field-hint, .field-error) {
+  font-size: 12px;
+}
+.workspace-tabs a:focus-visible,
+.editor-layout button:focus-visible,
+.saved-preview button:focus-visible {
+  outline: 3px solid #9b731d;
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .editor-context {
+    position: static;
+  }
+  .editor-roadmap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .editor-roadmap li {
+    padding-left: 9px;
+  }
+  .editor-layout .section-jumps {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .section-jumps .text-button {
+    flex-shrink: 0;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+  }
+  .editor-context .editor-privacy {
+    margin-top: 8px;
+  }
+  .editor-savebar {
+    top: 8px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .editor-savebar p {
+    display: none;
+  }
+  .editor-savebar b {
+    font-size: 12px;
+  }
+  .editor-savebar .button {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .editor-layout .personal-form input,
+  .editor-layout .personal-form textarea,
+  .editor-layout .personal-form select {
+    font-size: 16px;
+  }
+  .editor-layout .link-row {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+  .workspace-heading .pill {
+    align-self: flex-start;
+  }
+  .editor-layout .entry-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 420px) {
+  .editor-roadmap {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .editor-roadmap span {
+    margin-top: 2px;
+  }
+  .editor-roadmap li {
+    padding-left: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}

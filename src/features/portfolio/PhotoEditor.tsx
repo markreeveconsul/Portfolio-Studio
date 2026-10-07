@@ -77,7 +77,7 @@ export function PhotoEditor({
         JPG, PNG, or WebP · up to 2 MB. Visible only to you and authorized admins.
       </p>
       {!portfolio || disabled ? (
-        <p className="field-hint">Save your information before changing your photo.</p>
+        <p className="field-hint">Use Save changes above before choosing or changing your photo.</p>
       ) : null}
       <div className="photo-controls">
         {preview ? (
@@ -90,7 +90,23 @@ export function PhotoEditor({
           />
         )}
         <div>
-          <label htmlFor={id}>Choose a photo</label>
+          <button
+            type="button"
+            className="button outline photo-picker-button"
+            disabled={busy}
+            onClick={() => {
+              if (!portfolio || disabled) {
+                setError('Use Save changes above first, then choose your photo here.');
+                return;
+              }
+              setError('');
+              // Keep this synchronous with the tap so the browser can open its native picker.
+              input.current?.click();
+            }}
+          >
+            Choose a photo
+          </button>
+          <label htmlFor={id}>Photo file</label>
           <input
             ref={input}
             id={id}
