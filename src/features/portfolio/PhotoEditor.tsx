@@ -90,23 +90,9 @@ export function PhotoEditor({
           />
         )}
         <div>
-          <button
-            type="button"
-            className="button outline photo-picker-button"
-            disabled={busy}
-            onClick={() => {
-              if (!portfolio || disabled) {
-                setError('Use Save changes above first, then choose your photo here.');
-                return;
-              }
-              setError('');
-              // Keep this synchronous with the tap so the browser can open its native picker.
-              input.current?.click();
-            }}
-          >
-            Choose a photo
-          </button>
-          <label htmlFor={id}>Photo file</label>
+          <label className="sr-only" htmlFor={id}>
+            Photo file
+          </label>
           <input
             ref={input}
             id={id}

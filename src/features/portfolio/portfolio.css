@@ -954,19 +954,53 @@
   margin-top: 25px;
 }
 
-.photo-picker-button {
-  min-height: 44px;
-  margin-bottom: 12px;
+/* One native picker keeps direct file selection available on mobile. */
+.personal-form .photo-editor {
+  padding: 16px;
+}
+.photo-editor .portfolio-photo,
+.photo-editor .portfolio-initials {
+  width: 64px;
+  height: 64px;
+}
+.photo-editor .photo-controls {
+  gap: 14px;
+  margin-top: 12px;
 }
 .photo-controls > div {
+  min-width: 0;
   max-width: 100%;
 }
 .photo-controls input[type='file'] {
+  display: block;
   width: 100%;
+  max-width: 300px;
   min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
 }
 .photo-controls input[type='file']::file-selector-button {
   min-height: 44px;
-  margin-right: 8px;
+  margin-right: 10px;
   padding: 8px 12px;
+  border: 1px solid #bbcbb9;
+  border-radius: 6px;
+  background: #fff;
+  color: #24372e;
+  font: inherit;
+  cursor: pointer;
+}
+.photo-controls input[type='file']:disabled::file-selector-button {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.photo-controls input[type='file']:focus-visible {
+  outline: 2px solid #9b731d;
+  outline-offset: 3px;
+}
+.photo-editor .photo-actions {
+  margin-top: 8px;
+  gap: 12px;
 }

@@ -120,26 +120,8 @@ it('downloads privately and revokes the temporary URL on unmount', async () => {
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-photo');
 });
 
-it('opens the native file input synchronously from the choose-photo button', () => {
-  const service = { download: vi.fn(), save: vi.fn() };
-  render(
-    <PhotoEditor
-      portfolio={{ ...portfolio, photo_path: null }}
-      disabled={false}
-      service={service}
-      onSaved={vi.fn()}
-      onBusy={vi.fn()}
-    />,
-  );
-  const picker = screen.getByLabelText('Photo file') as HTMLInputElement;
-  const openPicker = vi.spyOn(picker, 'click').mockImplementation(() => {});
-  fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
-  expect(openPicker).toHaveBeenCalledTimes(1);
-  expect(service.save).not.toHaveBeenCalled();
-});
-
 it.each([null, portfolio])(
-  'explains why selection is unavailable before information is saved',
+  'keeps the single native picker disabled until information is saved',
   (saved) => {
     const service = { download: vi.fn().mockResolvedValue(new Blob()), save: vi.fn() };
     const { rerender } = render(
@@ -151,12 +133,11 @@ it.each([null, portfolio])(
         onBusy={vi.fn()}
       />,
     );
-    const picker = screen.getByLabelText('Photo file') as HTMLInputElement;
-    const openPicker = vi.spyOn(picker, 'click').mockImplementation(() => {});
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
-    expect(screen.getByRole('alert').textContent).toContain('Save changes above first');
-    expect(openPicker).not.toHaveBeenCalled();
-    expect(picker.disabled).toBe(true);
+    expect((screen.getByLabelText('Photo file') as HTMLInputElement).disabled).toBe(true);
+    expect(
+      screen.getByText('Use Save changes above before choosing or changing your photo.'),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Choose a photo' })).toBeNull();
     rerender(
       <PhotoEditor
         portfolio={{ ...portfolio, photo_path: null }}
@@ -166,8 +147,6 @@ it.each([null, portfolio])(
         onBusy={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a photo' }));
-    expect(openPicker).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('alert')).toBeNull();
+    expect((screen.getByLabelText('Photo file') as HTMLInputElement).disabled).toBe(false);
   },
 );
