@@ -80,11 +80,23 @@ export function SectionsEditor({
                     maxLength: field.limit,
                     'aria-invalid': Boolean(errors[name]),
                     'aria-describedby': `${id}-${name}-help`,
-                    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                    onChange: (
+                      event: React.ChangeEvent<
+                        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+                      >,
+                    ) =>
                       onChange({
                         ...value,
                         [definition.key]: value[definition.key].map((row, position) =>
-                          position === index ? { ...row, [field.key]: event.target.value } : row,
+                          position === index
+                            ? {
+                                ...row,
+                                [field.key]:
+                                  field.type === 'year' && event.target.value
+                                    ? event.target.value + '-01-01'
+                                    : event.target.value,
+                              }
+                            : row,
                         ),
                       }),
                   };
@@ -96,7 +108,33 @@ export function SectionsEditor({
                       <label htmlFor={props.id}>
                         {field.label} {!field.required && <span>Optional</span>}
                       </label>
-                      {field.type === 'textarea' ? (
+                      {field.type === 'year' ? (
+                        <select
+                          {...props}
+                          className="education-year"
+                          value={(entry[field.key] ?? '').slice(0, 4)}
+                        >
+                          <option value="">
+                            {field.key === 'end_date' ? 'Ongoing / not specified' : 'Choose a year'}
+                          </option>
+                          {[
+                            ...new Set([
+                              ...Array.from(
+                                { length: new Date().getFullYear() + 11 - 1900 },
+                                (_, i) => String(1900 + i),
+                              ),
+                              ...(entry[field.key] ? [entry[field.key].slice(0, 4)] : []),
+                            ]),
+                          ]
+                            .sort()
+                            .reverse()
+                            .map((year) => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))}
+                        </select>
+                      ) : field.type === 'textarea' ? (
                         <textarea {...props} rows={4} />
                       ) : (
                         <input

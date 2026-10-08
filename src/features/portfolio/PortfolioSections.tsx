@@ -1,13 +1,23 @@
 import { safeWebUrl } from './model';
 import type { SectionData } from './sections';
 
-function Dates({ start, end }: { start?: string; end?: string }) {
+function Dates({
+  start,
+  end,
+  yearsOnly = false,
+}: {
+  start?: string;
+  end?: string;
+  yearsOnly?: boolean;
+}) {
   const format = (date: string) =>
-    new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined, {
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'UTC',
-    });
+    yearsOnly
+      ? date.slice(0, 4)
+      : new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined, {
+          month: 'short',
+          year: 'numeric',
+          timeZone: 'UTC',
+        });
   if (!start && !end) return null;
   return (
     <p className="entry-date">
@@ -41,7 +51,7 @@ export function PortfolioSections({
             <div className="portfolio-entry" key={index}>
               <h4>{entry.institution}</h4>
               {entry.qualification && <p>{entry.qualification}</p>}
-              <Dates start={entry.start_date} end={entry.end_date} />
+              <Dates start={entry.start_date} end={entry.end_date} yearsOnly />
             </div>
           ))}
         </section>

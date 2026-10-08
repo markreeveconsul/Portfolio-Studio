@@ -9,7 +9,7 @@ export interface SectionField {
   label: string;
   required?: boolean;
   limit?: number;
-  type?: 'date' | 'url' | 'textarea';
+  type?: 'year' | 'date' | 'url' | 'textarea';
 }
 export const sectionDefinitions: {
   key: SectionName;
@@ -26,8 +26,8 @@ export const sectionDefinitions: {
     fields: [
       { key: 'institution', label: 'Institution', required: true, limit: 180 },
       { key: 'qualification', label: 'Qualification', limit: 180 },
-      { key: 'start_date', label: 'Start date', type: 'date' },
-      { key: 'end_date', label: 'End date', type: 'date' },
+      { key: 'start_date', label: 'Start year', type: 'year' },
+      { key: 'end_date', label: 'End year', type: 'year' },
     ],
   },
   {
@@ -98,8 +98,10 @@ export function validateSections(input: SectionData): {
           errors[errorKey] = `Enter ${field.label.toLowerCase()}, or remove this entry.`;
         else if (field.limit && value.length > field.limit)
           errors[errorKey] = `Use no more than ${field.limit.toLocaleString()} characters.`;
-        else if (value && field.type === 'date' && !validDate(value))
+        else if (value && (field.type === 'date' || field.type === 'year') && !validDate(value))
           errors[errorKey] = 'Enter a valid date.';
+        else if (value && field.type === 'year')
+          normalized[field.key] = value.slice(0, 4) + '-01-01';
         else if (value && field.type === 'url') {
           const safe = safeWebUrl(value);
           if (!safe || safe.length > 2000)
@@ -114,7 +116,9 @@ export function validateSections(input: SectionData): {
         normalized.end_date < normalized.start_date
       )
         errors[`${definition.key}_${index}_end_date`] =
-          'End date must be on or after the start date.';
+          definition.key === 'education'
+            ? 'End year must be on or after the start year.'
+            : 'End date must be on or after the start date.';
       return normalized;
     });
   }

@@ -1,3 +1,4 @@
+import { PlatformIcon } from '../../components/PlatformIcon';
 import { PortfolioSections } from './PortfolioSections';
 import { safeWebUrl } from './model';
 import type { PortfolioDraft } from './model';
@@ -51,7 +52,10 @@ export function SimplePortfolio({
               const safe = safeWebUrl(link.url);
               return (
                 <div key={`${index}-${link.label}`}>
-                  <dt>{link.label}</dt>
+                  <dt>
+                    <PlatformIcon url={link.url} />
+                    {link.label}
+                  </dt>
                   <dd>
                     {safe ? (
                       <a href={safe} target="_blank" rel="noopener noreferrer">

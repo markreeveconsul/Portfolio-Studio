@@ -1,3 +1,4 @@
+import { PlatformIcon, platformForUrl } from '../../components/PlatformIcon';
 import './editor-ux.css';
 import { CebuContactFields } from './CebuContactFields';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -553,6 +554,10 @@ export function PortfolioEditor({
                     aria-invalid={Boolean(fieldErrors[`link_url_${index}`])}
                     aria-describedby={`${id}-link-url-error-${index}`}
                   />
+                  <p className="platform-detection">
+                    <PlatformIcon url={link.url} />
+                    {platformForUrl(link.url)?.name ?? 'Website'} · icon chosen from URL
+                  </p>
                   <p id={`${id}-link-url-error-${index}`} className="field-error">
                     {fieldErrors[`link_url_${index}`]}
                   </p>

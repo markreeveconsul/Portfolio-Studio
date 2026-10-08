@@ -1,3 +1,4 @@
+import { PlatformIcon } from '../../components/PlatformIcon';
 import type { Portfolio } from './model';
 import { safeWebUrl } from './model';
 export function PortfolioContact({ portfolio }: { portfolio: Portfolio }) {
@@ -22,7 +23,10 @@ export function PortfolioContact({ portfolio }: { portfolio: Portfolio }) {
         )}
         {portfolio.social_links.map((link, index) => (
           <div key={index}>
-            <dt>{link.label}</dt>
+            <dt>
+              <PlatformIcon url={link.url} />
+              {link.label}
+            </dt>
             <dd>
               {safeWebUrl(link.url) ? (
                 <a href={safeWebUrl(link.url)!} target="_blank" rel="noopener noreferrer">

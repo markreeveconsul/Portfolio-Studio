@@ -1,0 +1,49 @@
+.platform-icon {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: 7px;
+}
+.platform-icon img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.linkedin-mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  color: white;
+  background: #0a66c2;
+  font:
+    bold 14px Arial,
+    sans-serif;
+}
+.platform-detection {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.personal-form select.education-year {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #cfd8ca;
+  border-radius: 6px;
+  background: #fdfefb;
+  padding: 10px 12px;
+  font: inherit;
+  color: inherit;
+}
+@media (max-width: 760px) {
+  .personal-form select.education-year {
+    font-size: 16px;
+  }
+}
